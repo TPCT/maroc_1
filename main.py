@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     def rewardsClaimer(account):
         global fail, success
-        session = SessionRequests()
+        session = SessionRequests(proxies=proxies)
         login_handler = Login(session=session, proxies=proxies, logger=logger)
         rewards_handler = Rewards(session=session, proxies=proxies, logger=logger)
         login_info = login_handler.login(login_token=account['login_token'])

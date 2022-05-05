@@ -6,6 +6,7 @@ from Core.SessionRequests import SessionRequests
 from random import choice
 from time import sleep
 
+
 class Login:
     def __init__(self, **kwargs):
         self._logger = kwargs.get('logger', Logger())

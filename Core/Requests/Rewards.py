@@ -159,6 +159,9 @@ class Rewards:
                                      f'[+] status code: {response.status_code}\n\t '
                                      f'[+] payload: {payload}\n\t '
                                      f'[+] endpoint: {RewardsUrls.gems}')
+
+                    if response.json() == payload:
+                        break
             return True
         except Exception as e:
             self._logger.log("[-] an error occurred while trying to collect gems reward gift\n\t "
