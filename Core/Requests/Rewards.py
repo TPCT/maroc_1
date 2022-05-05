@@ -160,7 +160,7 @@ class Rewards:
                                      f'[+] payload: {payload}\n\t '
                                      f'[+] endpoint: {RewardsUrls.gems}')
 
-                    if response.json() == payload:
+                    if 'balance' not in response.text:
                         break
             return True
         except Exception as e:
