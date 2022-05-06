@@ -2,7 +2,6 @@ from Core.Requests.Account import Login, Register
 from Core.Requests.Rewards import Rewards
 from Core.Database.Accounts import AccountsDatabase
 from Core.Database.Rewards import RewardsDatabase
-from Core.SessionRequests import SessionRequests
 from Core.Logger import Logger
 from Core.Proxy import Proxy
 from time import time, sleep
@@ -22,9 +21,8 @@ if __name__ == "__main__":
 
     def rewardsClaimer(account):
         global fail, success
-        session = SessionRequests(proxies=proxies)
-        login_handler = Login(session=session, proxies=proxies, logger=logger)
-        rewards_handler = Rewards(session=session, proxies=proxies, logger=logger)
+        login_handler = Login(proxies=proxies, logger=logger)
+        rewards_handler = Rewards(proxies=proxies, logger=logger)
         login_info = login_handler.login(login_token=account['login_token'])
         rewards_database.insert(account['id'], reward_day=time())
         rewards_info = rewards_database.select(account_id=account['id'])
@@ -42,29 +40,39 @@ if __name__ == "__main__":
             if rewards_handler.spinRewardsResponse():
                 rewards_database.update(account['id'], last_spin_time=time())
 
-            if rewards_handler.collectGemsResponse():
-                pass
-
             account_info = login_handler.getAccountInfoResponse(login_token=login_info['login_token'])
             account_database.update(account['email'], **account_info)
             success += 1
         else:
             fail += 1
 
-
     def accountCreator():
         global fail, success
         account_generator = Register(logger=logger, proxies=proxies)
-        account_login = Login(logger=logger, proxies=proxies)
-        account_info = account_generator.createAccount(f"{time() * randint(1, 1000000000000)}@avkngeeks.com",
-                                                       f"{time() * randint(1, 1000000000000)}@a")
-        if account_info:
-            levels = account_login.getAccountInfoResponse(login_token=account_info['login_token'])
-            account_info.update(levels if levels else {})
+        account_login = Login(logger=logger, proxies=proxies,
+                              session=account_generator.session)
+        rewards = Rewards(logger=logger, session=account_generator.session)
 
-        status = account_database.insert(**account_info)
-        success += 1 if status else 0
-        fail += 0 if status else 1
+        account_info = account_generator.createAccount(f"{time() + randint(1, 1000000000000)}@avkngeeks.com",
+                                                       f"{time() + randint(1, 1000000000000)}@a")
+        logger.log(f"account_info: {account_info}")
+        if account_info:
+            rewards.setSessionToken(session_token=account_generator.session_token)
+
+            while not rewards.getOneTimeRewardsResponse():
+                continue
+
+            while not rewards.bypassDailyLimitResponse():
+                continue
+
+            levels = account_login.getAccountInfoResponse(login_token=account_generator.login_token)
+            if levels:
+                account_info.update(levels if levels else {})
+                account_database.insert(**account_info)
+                success += 1
+                return
+
+        fail += 1
 
     def wrapper():
         print("Welcome to TPCT AVKN life bot\n\t"

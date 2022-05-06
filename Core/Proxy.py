@@ -2,6 +2,7 @@ import os.path
 from Core.Logger import Logger
 from random import shuffle
 
+
 class Proxy:
     PROXY_URL = "https://api.proxyscrape.com/v2/?request=displayproxies&protocol={protocol}&timeout={" \
                 "timeout}&country={country}&ssl={ssl}&anonymity={anonymity} "

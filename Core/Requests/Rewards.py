@@ -3,7 +3,6 @@ from Core.Urls import RewardsUrls
 from Core.Logger import Logger
 from Core.SessionRequests import SessionRequests
 from random import choice
-from time import sleep
 
 
 class Rewards:
@@ -14,14 +13,7 @@ class Rewards:
         self._proxies = kwargs.get('proxies', [])
 
     def setSessionToken(self, session_token):
-        proxy = {}
-        if self._proxies:
-            proxy = choice(self._proxies)
-            proxy = {
-                'http': proxy,
-                'https': proxy
-            }
-        self._session.proxies.update(proxy)
+        self._session.setProxy()
         self._session_token = session_token
 
     def getOneTimeRewardsResponse(self):
