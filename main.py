@@ -25,6 +25,7 @@ if __name__ == "__main__":
         login_info = login_handler.login(login_token=account['login_token'])
         account_info = login_handler.getAccountInfoResponse()
         account_database.update(account['email'], **account_info)
+        sleep(5)
 
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
@@ -37,6 +38,7 @@ if __name__ == "__main__":
                     if rewards_handler.collectGemsResponse():
                         break
 
+                sleep(5)
                 account_info = login_handler.getAccountInfoResponse()
                 account_database.update(account['email'], **account_info)
                 rewards_database.update(account['id'],  reward_day=time())
@@ -47,6 +49,7 @@ if __name__ == "__main__":
         login_info = login_handler.login(login_token=account['login_token'])
         account_info = login_handler.getAccountInfoResponse()
         account_database.update(account['email'], **account_info)
+        sleep(5)
 
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
@@ -75,9 +78,9 @@ if __name__ == "__main__":
                                                 daily_visit=rewards_info['daily_visit'] + 1,
                                                 photo=rewards_info['photo'] + 1)
                         break
-                    sleep(5)
 
-                account_info = login_handler.getAccountInfoResponse(login_token=login_info['login_token'])
+                sleep(5)
+                account_info = login_handler.getAccountInfoResponse()
                 account_database.update(account['email'], **account_info)
                 rewards_database.update(account['id'],  reward_day=time())
 
@@ -100,7 +103,7 @@ if __name__ == "__main__":
             while not rewards.bypassDailyLimitResponse():
                 continue
 
-            levels = account_login.getAccountInfoResponse(login_token=account_generator.login_token)
+            levels = account_login.getAccountInfoResponse()
             if levels:
                 account_info.update(levels if levels else {})
                 account_database.insert(**account_info)
