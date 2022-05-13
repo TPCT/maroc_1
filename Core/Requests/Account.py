@@ -128,7 +128,7 @@ class Login:
             self._logger.log("[+] trying to get Current day info")
             response = self._session.request('post', AccountUrls.getCurrentDate, json={},
                                              headers={'X-Avkn-Jwtsession': self._session_token})
-            self._logger.log("[+] balance info has been retrieved successfully\n\t "
+            self._logger.log("[+] current day info has been retrieved successfully\n\t "
                              f"[+] response: {response.text}\n\t "
                              f"[+] status code: {response.status_code}"
                              )

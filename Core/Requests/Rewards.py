@@ -75,13 +75,17 @@ class Rewards:
         try:
             for retries, payload in RewardsPayloads.createDailyXpBoostingPayload():
                 for i in range(retries):
-                    response = self._session.request('post', RewardsUrls.xp_boosting,
-                                                     json=payload,
-                                                     headers={'X-Avkn-Jwtsession': self._session_token})
-                    self._logger.log('[+] claiming xp boosting response has been retrieved\n\t '
-                                     f'[+] response: {response.text}\n\t '
-                                     f'[+] status code: {response.status_code}\n\t '
-                                     f'[+] payload: {payload}')
+                    while True:
+                        response = self._session.request('post', RewardsUrls.xp_boosting,
+                                                         json=payload,
+                                                         headers={'X-Avkn-Jwtsession': self._session_token})
+                        self._logger.log('[+] claiming xp boosting response has been retrieved\n\t '
+                                         f'[+] response: {response.text}\n\t '
+                                         f'[+] status code: {response.status_code}\n\t '
+                                         f'[+] payload: {payload}')
+
+                        if response and response.status_code in (200, 417):
+                            break
 
                     response_json = response.json()
                     if 'lkwd' not in response_json:

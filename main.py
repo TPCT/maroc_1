@@ -27,42 +27,37 @@ if __name__ == "__main__":
         account_database.update(account['email'], **account_info)
 
     def gemsClaimer(account):
-        account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
-        login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
-        login_info = login_handler.login(login_token=account['login_token'])
+        if (time() - account['last_update_time']) // (24 * 3600) >= 4:
+            account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
+            login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
+            login_info = login_handler.login(login_token=account['login_token'])
 
-        if login_info:
-            rewards_handler = Rewards(account_session=account_session,
-                                      logger=logger, session_token=login_info['session_token'])
-
-            if (time() - account['last_update_time']) // (24*3600) >= 6:
-                while True:
-                    if rewards_handler.collectGemsResponse():
-                        break
-
-            getUpdateAccountInfo(login_handler, account)
+            if login_info:
+                rewards_handler = Rewards(account_session=account_session,
+                                          logger=logger, session_token=login_info['session_token'])
+                rewards_handler.collectGemsResponse()
+                getUpdateAccountInfo(login_handler, account)
 
     def rewardsClaimer(account):
-        account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
-        login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
-        login_info = login_handler.login(login_token=account['login_token'])
+        if (time() - account['last_update_time']) // (24 * 3600) >= 4:
+            account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
+            login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
+            login_info = login_handler.login(login_token=account['login_token'])
 
-        if login_info:
-            rewards_handler = Rewards(account_session=account_session,
-                                      logger=logger, session_token=login_info['session_token'])
-
-            if (time() - account['last_update_time']) // (24*3600) >= 4:
+            if login_info:
+                rewards_handler = Rewards(account_session=account_session,
+                                          logger=logger, session_token=login_info['session_token'])
                 rewards_handler.spinRewardsResponse()
                 current_day = login_handler.getCurrentDate()
-                while current_day < 42:
-                    if rewards_handler.claimDailyGiftsResponse(current_day):
+                while current_day <= 42:
+                    if rewards_handler.claimDailyGiftsResponse(current_day-1):
                         break
 
                 while True:
                     if rewards_handler.claimXpBoostingResponse():
                         break
 
-            getUpdateAccountInfo(login_handler, account)
+                getUpdateAccountInfo(login_handler, account)
 
     def accountCreator():
         global fail, success
