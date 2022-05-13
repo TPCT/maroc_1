@@ -50,7 +50,7 @@ if __name__ == "__main__":
                 rewards_handler.spinRewardsResponse()
                 current_day = login_handler.getCurrentDate()
                 while current_day <= 42:
-                    if rewards_handler.claimDailyGiftsResponse(current_day-1):
+                    if rewards_handler.claimDailyGiftsResponse(current_day):
                         break
 
                 while True:
@@ -110,6 +110,7 @@ if __name__ == "__main__":
             pass
         elif choice == "2":
             accounts = account_database.selectAll()
+            accounts.reverse()
             threads_count = input("[+] please enter threads count to start: ")
             if threads_count.isdigit():
                 while True:
