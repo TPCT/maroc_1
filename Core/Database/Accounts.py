@@ -88,11 +88,11 @@ class AccountsDatabase:
     def update(self, email, **kwargs):
         self._logger.log(f"[+] trying to fetch account's info\n\t [+] email: {email}")
         try:
-            update_builder = ', '.join([f"{key} = ?" for key in kwargs.keys()])
-            query = f"UPDATE accounts SET {update_builder} WHERE email = ?"
+            update_builder = ', '.join([f"{key} = {value}" for key, value in kwargs.items()])
+            query = f"UPDATE accounts SET {update_builder} WHERE email = {email}"
             with self._logger.locker:
                 cursor = self._connector.cursor()
-                cursor.execute(query, list(kwargs.values()) + [email])
+                cursor.execute(query)
                 self._connector.commit()
                 cursor.close()
             self._logger.log("[+] account's info has been updated successfully.")

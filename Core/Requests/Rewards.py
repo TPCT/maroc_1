@@ -1,16 +1,13 @@
 from Core.Payloads import RewardsPayloads
 from Core.Urls import RewardsUrls
 from Core.Logger import Logger
-from Core.SessionRequests import SessionRequests
-from random import choice
 
 
 class Rewards:
-    def __init__(self, **kwargs):
+    def __init__(self, account_session, **kwargs):
         self._logger = kwargs.get('logger', Logger())
-        self._session = kwargs.get('session', SessionRequests(proxies=kwargs.get('proxies', kwargs.get('proxies', None))))
+        self._session = account_session
         self._session_token = kwargs.get("session_token", None)
-        self._proxies = kwargs.get('proxies', [])
 
     def setSessionToken(self, session_token):
         self._session.setProxy()
@@ -115,7 +112,7 @@ class Rewards:
                 if not response.text or not response.json()['config']:
                     return None
 
-            for i in range(2):
+            for i in range(1):
                 response = self._session.request('post', RewardsUrls.spin_2,
                                                  json=RewardsPayloads.createSpinRewardsPayload(),
                                                  headers={'X-Avkn-Jwtsession': self._session_token})

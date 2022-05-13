@@ -1,20 +1,20 @@
 from Core.Logger import Logger
 from Core.Urls import AccountUrls
 from Core.Payloads import AccountPayloads
-from Core.SessionRequests import SessionRequests
 from random import choice
 
 
 class Login:
-    def __init__(self, **kwargs):
+    def __init__(self, account_session, **kwargs):
         self._logger = kwargs.get('logger', Logger())
-        self._session = kwargs.get('session', SessionRequests(proxies=kwargs.get('proxies', []), logger=self._logger))
+        self._session = account_session
         self._email = None
         self._password = None
         self._login_token = None
         self._session_token = None
 
     def _resetData(self):
+        self._session.setProxy()
         self._email = None
         self._password = None
         self._login_token = None
@@ -27,8 +27,7 @@ class Login:
         response = None
         try:
             response = self._session.request('post', AccountUrls.login,
-                                             json=AccountPayloads.createLoginPayload(self._email, self._password),
-                                             infinite=False)
+                                             json=AccountPayloads.createLoginPayload(self._email, self._password))
             response_json = response.json()
             if response_json['error']:
                 self._logger.log(f"[-] unable to login to the account\n\t "
@@ -57,8 +56,7 @@ class Login:
         response = None
         try:
             response = self._session.request('post', AccountUrls.login,
-                                             json=AccountPayloads.createTokenLoginPayload(self._login_token),
-                                             infinite=False)
+                                             json=AccountPayloads.createTokenLoginPayload(self._login_token))
             response_json = response.json()
             if response_json['error']:
                 self._logger.log(f"[-] unable to login to the account\n\t "
@@ -85,7 +83,7 @@ class Login:
         try:
             self._logger.log("[+] trying to get xp, level info")
             response = self._session.request('post', AccountUrls.level, json={},
-                                             headers={'X-Avkn-Jwtsession': self._session_token}, infinite=False)
+                                             headers={'X-Avkn-Jwtsession': self._session_token})
             self._logger.log("[+] info has been retrieved successfully\n\t "
                              f"[+] response: {response.text}\n\t "
                              f"[+] status code: {response.status_code}"
@@ -107,7 +105,7 @@ class Login:
         try:
             self._logger.log("[+] trying to get coins, gems info")
             response = self._session.request('post', AccountUrls.balance, json={},
-                                             headers={'X-Avkn-Jwtsession': self._session_token}, infinite=False)
+                                             headers={'X-Avkn-Jwtsession': self._session_token})
             self._logger.log("[+] info has been retrieved successfully\n\t "
                              f"[+] response: {response.text}\n\t "
                              f"[+] status code: {response.status_code}"
@@ -149,39 +147,21 @@ class Login:
 
 
 class Register:
-    def __init__(self, **kwargs):
+    def __init__(self, account_session, **kwargs):
         self._logger = kwargs.get('logger', Logger())
-        self._session = kwargs.get('session', SessionRequests(proxies=kwargs.get('proxies', []), logger=self._logger))
+        self._session = account_session
         self._email = None
         self._password = None
-        # self._pre_session = None
         self._character_token = None
         self._username_token = None
         self._login_token = None
         self._session_token = None
 
-    # def _preSessionResponse(self):
-    #     self._logger.log("[+] trying to retrieve pre_session token.")
-    #     response = None
-    #     try:
-    #         response = self._session.request('post', AccountUrls.pre_session, json={})
-    #         response_json = response.json()
-    #         self._pre_session = response_json['pre_session']
-    #         self._logger.log('[+] pre_session token has been retrieved successfully\n\t '
-    #                          f"[+] user id: {response_json['user_id']}\n\t "
-    #                          f'[+] status code: {response.status_code}')
-    #         return self._pre_session
-    #     except Exception as e:
-    #         self._logger.log("[-] an error occurred while trying to retrieve pre_session token.\n\t "
-    #                          f"[-] error: {e}\n\t "
-    #                          f"[-] response: {response.text if response else None}\n\t "
-    #                          f"[-] status code: {response.status_code if response else -1}", True)
-
     def _characterTokenResponse(self):
         self._logger.log("[+] trying to retrieve character key token")
         response = None
         try:
-            response = self._session.request('post', AccountUrls.old_key_token, json={}, infinite=False)
+            response = self._session.request('post', AccountUrls.old_key_token, json={})
             if response:
                 response_json = response.json()
                 character = choice(response_json['configs'])
@@ -200,7 +180,7 @@ class Register:
         self._logger.log("[+] trying to get username token")
         response = None
         try:
-            response = self._session.request('post', AccountUrls.username_key_token, json={}, infinite=False)
+            response = self._session.request('post', AccountUrls.username_key_token, json={})
             if response:
                 response_json = response.json()
                 username = choice(response_json['usernames'])
@@ -224,7 +204,7 @@ class Register:
                                                  "",
                                                  self._character_token,
                                                  self._username_token
-                                             ), infinite=False)
+                                             ))
             if response:
                 response_json = response.json()
                 self._login_token = response_json['login_token']
@@ -251,7 +231,7 @@ class Register:
                                              json=AccountPayloads.createAccountPayload(self._email, self._password),
                                              headers={
                                                  "X-Avkn-Jwtsession": self._session_token
-                                             }, infinite=False)
+                                             })
             if response:
                 response_json = response.json()
                 if response_json['error'] is None:
@@ -266,9 +246,9 @@ class Register:
                              f'[-] status code: {response.status_code if response else -1}', True)
 
     def _resetData(self):
+        self._session.setProxy()
         self._email = None
         self._password = None
-        # self._pre_session = None
         self._character_token = None
         self._username_token = None
         self._login_token = None

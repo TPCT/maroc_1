@@ -86,13 +86,13 @@ class RewardsDatabase:
     def update(self, account_id, **kwargs):
         self._logger.log(f"[+] trying to fetch reward's info\n\t [+] account id: {account_id}")
         try:
-            update_builder = ', '.join([f"{key} = ?" for key in kwargs.keys()])
-            query = f"UPDATE rewards SET {update_builder} WHERE account_id = ?"
+            update_builder = ', '.join([f"{key} = {value}" for key, value in kwargs.items()])
+            query = f"UPDATE rewards SET {update_builder} WHERE account_id = {account_id}"
             with self._logger.locker:
                 cursor = self._connector.cursor()
-                cursor.execute(query, [account_id] + list(kwargs.values()))
-                self._connector.commit()
+                cursor.execute(query)
                 cursor.close()
+                self._connector.commit()
             self._logger.log("[+] reward's info has been updated successfully.")
             return True
         except Exception as e:
