@@ -19,13 +19,19 @@ if __name__ == "__main__":
     account_database = AccountsDatabase(logger=logger)
     rewards_database = RewardsDatabase(logger=logger)
 
+    def getUpdateAccountInfo(login_handler, account):
+        while True:
+            account_info = login_handler.getAccountInfoResponse()
+            if account_info:
+                break
+            sleep(5)
+
+        account_database.update(account['email'], **account_info)
+
     def gemsClaimer(account):
         account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
         login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
         login_info = login_handler.login(login_token=account['login_token'])
-        account_info = login_handler.getAccountInfoResponse()
-        account_database.update(account['email'], **account_info)
-        sleep(5)
 
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
@@ -37,19 +43,12 @@ if __name__ == "__main__":
                 while True:
                     if rewards_handler.collectGemsResponse():
                         break
-
-                sleep(5)
-                account_info = login_handler.getAccountInfoResponse()
-                account_database.update(account['email'], **account_info)
-                rewards_database.update(account['id'],  reward_day=time())
+            getUpdateAccountInfo(login_handler, account)
 
     def rewardsClaimer(account):
         account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
         login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
         login_info = login_handler.login(login_token=account['login_token'])
-        account_info = login_handler.getAccountInfoResponse()
-        account_database.update(account['email'], **account_info)
-        sleep(5)
 
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
@@ -79,10 +78,9 @@ if __name__ == "__main__":
                                                 photo=rewards_info['photo'] + 1)
                         break
 
-                sleep(5)
-                account_info = login_handler.getAccountInfoResponse()
-                account_database.update(account['email'], **account_info)
                 rewards_database.update(account['id'],  reward_day=time())
+
+            getUpdateAccountInfo(login_handler, account)
 
     def accountCreator():
         global fail, success
@@ -104,6 +102,7 @@ if __name__ == "__main__":
                 continue
 
             levels = account_login.getAccountInfoResponse()
+
             if levels:
                 account_info.update(levels if levels else {})
                 account_database.insert(**account_info)
