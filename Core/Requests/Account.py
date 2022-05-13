@@ -84,7 +84,7 @@ class Login:
             self._logger.log("[+] trying to get xp, level info")
             response = self._session.request('post', AccountUrls.level, json={},
                                              headers={'X-Avkn-Jwtsession': self._session_token})
-            self._logger.log("[+] info has been retrieved successfully\n\t "
+            self._logger.log("[+] xp info has been retrieved successfully\n\t "
                              f"[+] response: {response.text}\n\t "
                              f"[+] status code: {response.status_code}"
                              )
@@ -106,7 +106,7 @@ class Login:
             self._logger.log("[+] trying to get coins, gems info")
             response = self._session.request('post', AccountUrls.balance, json={},
                                              headers={'X-Avkn-Jwtsession': self._session_token})
-            self._logger.log("[+] info has been retrieved successfully\n\t "
+            self._logger.log("[+] balance info has been retrieved successfully\n\t "
                              f"[+] response: {response.text}\n\t "
                              f"[+] status code: {response.status_code}"
                              )
@@ -122,9 +122,8 @@ class Login:
                              f"[-] status code: {response.status_code if response else -1}", True)
             return None
 
-    def getAccountInfoResponse(self, **kwargs):
+    def getAccountInfoResponse(self):
         try:
-            self.login(**kwargs)
             self._logger.log("[+] trying to get account's info")
             info = {}
             level = self._getAccountsLevel()

@@ -23,6 +23,9 @@ if __name__ == "__main__":
         account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
         login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
         login_info = login_handler.login(login_token=account['login_token'])
+        account_info = login_handler.getAccountInfoResponse()
+        account_database.update(account['email'], **account_info)
+
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
                                       logger=logger, session_token=login_info['session_token'])
@@ -34,7 +37,7 @@ if __name__ == "__main__":
                     if rewards_handler.collectGemsResponse():
                         break
 
-                account_info = login_handler.getAccountInfoResponse(login_token=login_info['login_token'])
+                account_info = login_handler.getAccountInfoResponse()
                 account_database.update(account['email'], **account_info)
                 rewards_database.update(account['id'],  reward_day=time())
 
@@ -42,6 +45,9 @@ if __name__ == "__main__":
         account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
         login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
         login_info = login_handler.login(login_token=account['login_token'])
+        account_info = login_handler.getAccountInfoResponse()
+        account_database.update(account['email'], **account_info)
+
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
                                       logger=logger, session_token=login_info['session_token'])
