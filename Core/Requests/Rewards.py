@@ -61,7 +61,7 @@ class Rewards:
             self._logger.log('[+] claiming daily gift response has been retrieved\n\t '
                              f'[+] response: {response.text}\n\t ' 
                              f'[+] status code: {response.status_code}')
-            return response
+            return response.status_code in (200, 417)
         except Exception as e:
             self._logger.log("[-] an error occurred while trying to claim daily gift\n\t "
                              f"[-] error: {e}\n\t "

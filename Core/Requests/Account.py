@@ -122,6 +122,24 @@ class Login:
                              f"[-] status code: {response.status_code if response else -1}", True)
             return None
 
+    def getCurrentDate(self):
+        response = None
+        try:
+            self._logger.log("[+] trying to get Current day info")
+            response = self._session.request('post', AccountUrls.getCurrentDate, json={},
+                                             headers={'X-Avkn-Jwtsession': self._session_token})
+            self._logger.log("[+] balance info has been retrieved successfully\n\t "
+                             f"[+] response: {response.text}\n\t "
+                             f"[+] status code: {response.status_code}"
+                             )
+            return response.json()['current_day']
+        except Exception as e:
+            self._logger.log("[-] an error occurred while trying to get account's balance.\n\t "
+                             f"[-] response: {response.text if response else None}\n\t "
+                             f"[-] error: {e}\n\t "
+                             f"[-] status code: {response.status_code if response else -1}", True)
+            return None
+
     def getAccountInfoResponse(self):
         try:
             self._logger.log("[+] trying to get account's info")

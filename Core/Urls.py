@@ -7,6 +7,7 @@ class AccountUrls:
     login = "https://api.avkn.co/auth/1/auth/1/login"
     level = "https://api.avkn.co/ws/1/xp/1/get"
     balance = "https://api.avkn.co/ws/1/balance/1/get"
+    getCurrentDate = "https://api.avkn.co/rewards/1/dailybonus/1/list"
 
 
 class RewardsUrls:

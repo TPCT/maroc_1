@@ -25,7 +25,8 @@ class AccountsDatabase:
                         xp INTEGER NOT NULL DEFAULT 0,
                         level INTEGER NOT NULL DEFAULT 1,
                         coins INTEGER NOT NULL DEFAULT 0,
-                        gems INTEGER NOT NULL DEFAULT 0
+                        gems INTEGER NOT NULL DEFAULT 0,
+                        last_update_time TIMESTAMP NOT NULL DEFAULT 0
                     );
                 '''
         try:
@@ -77,7 +78,8 @@ class AccountsDatabase:
                     'xp': row[5],
                     'level': row[6],
                     'coins': row[7],
-                    'gems': row[8]
+                    'gems': row[8],
+                    'last_update_time': row[9]
                 })
             self._logger.log("[+] Accounts info has been retrieved successfully")
             return accounts
@@ -123,7 +125,8 @@ class AccountsDatabase:
                 'xp': account_info[5],
                 'level': account_info[6],
                 'coins': account_info[7],
-                'gems': account_info[8]
+                'gems': account_info[8],
+                'last_update_time': account_info[9]
             }
         except Exception as e:
             self._logger.log(f"[-] unable to fetch account's info\n\t [-] error: {e}", True)

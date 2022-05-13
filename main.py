@@ -1,7 +1,6 @@
 from Core.Requests.Account import Login, Register
 from Core.Requests.Rewards import Rewards
 from Core.Database.Accounts import AccountsDatabase
-from Core.Database.Rewards import RewardsDatabase
 from Core.SessionRequests import SessionRequests
 from Core.Logger import Logger
 from Core.Proxy import Proxy
@@ -17,7 +16,6 @@ if __name__ == "__main__":
     success = 0
 
     account_database = AccountsDatabase(logger=logger)
-    rewards_database = RewardsDatabase(logger=logger)
 
     def getUpdateAccountInfo(login_handler, account):
         while True:
@@ -25,7 +23,7 @@ if __name__ == "__main__":
             if account_info:
                 break
             sleep(5)
-
+        account_info['last_update_time'] = time()
         account_database.update(account['email'], **account_info)
 
     def gemsClaimer(account):
@@ -36,13 +34,12 @@ if __name__ == "__main__":
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
                                       logger=logger, session_token=login_info['session_token'])
-            rewards_database.insert(account['id'])
-            rewards_info = rewards_database.select(account_id=account['id'])
 
-            if (time() - rewards_info['reward_day']) // (24*3600) >= 6:
+            if (time() - account['last_update_time']) // (24*3600) >= 6:
                 while True:
                     if rewards_handler.collectGemsResponse():
                         break
+
             getUpdateAccountInfo(login_handler, account)
 
     def rewardsClaimer(account):
@@ -53,32 +50,17 @@ if __name__ == "__main__":
         if login_info:
             rewards_handler = Rewards(account_session=account_session,
                                       logger=logger, session_token=login_info['session_token'])
-            rewards_database.insert(account['id'])
-            rewards_info = rewards_database.select(account_id=account['id'])
-            current_day = rewards_info['current_day'] if rewards_info else 0
 
-            if (time() - rewards_info['reward_day']) // (24*3600) >= 4:
-                if rewards_handler.spinRewardsResponse():
-                    rewards_database.update(account['id'], last_spin_time=time())
-
-                while current_day <= 42:
+            if (time() - account['last_update_time']) // (24*3600) >= 4:
+                rewards_handler.spinRewardsResponse()
+                current_day = login_handler.getCurrentDate()
+                while current_day < 42:
                     if rewards_handler.claimDailyGiftsResponse(current_day):
-                        rewards_database.update(account['id'], current_day=current_day)
                         break
-                    current_day += 1
 
                 while True:
                     if rewards_handler.claimXpBoostingResponse():
-                        rewards_database.update(account['id'], visitor=rewards_info['visitor'] + 1,
-                                                mbox=rewards_info['mbox'] + 1,
-                                                talking=rewards_info['talking'] + 1,
-                                                daily_gems=rewards_info['daily_gems'] + 1,
-                                                dive=rewards_info['dive'] + 1,
-                                                daily_visit=rewards_info['daily_visit'] + 1,
-                                                photo=rewards_info['photo'] + 1)
                         break
-
-                rewards_database.update(account['id'],  reward_day=time())
 
             getUpdateAccountInfo(login_handler, account)
 
