@@ -7,7 +7,7 @@ from Core.Logger import Logger
 from Core.Proxy import Proxy
 from time import time, sleep
 from threading import Thread, Lock
-from random import shuffle, randint
+from random import randint
 
 if __name__ == "__main__":
     logger = Logger(locker=Lock())
@@ -49,12 +49,9 @@ if __name__ == "__main__":
             rewards_info = rewards_database.select(account_id=account['id'])
             current_day = rewards_info['current_day'] if rewards_info else 0
 
-            if (time() - rewards_info['reward_day']) // (24*3600) >= 6:
-                while True:
-                    if rewards_handler.spinRewardsResponse():
-                        rewards_database.update(account['id'], last_spin_time=time())
-                        break
-                    sleep(5)
+            if (time() - rewards_info['reward_day']) // (24*3600) >= 4:
+                if rewards_handler.spinRewardsResponse():
+                    rewards_database.update(account['id'], last_spin_time=time())
 
                 while current_day <= 42:
                     if rewards_handler.claimDailyGiftsResponse(current_day):
