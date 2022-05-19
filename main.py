@@ -5,10 +5,12 @@ from Core.SessionRequests import SessionRequests
 from Core.Logger import Logger
 from Core.Proxy import Proxy
 from time import time, sleep
-from threading import Thread, Lock
+from threading import Thread, Lock, Event
 from random import randint
 
+
 if __name__ == "__main__":
+    blocker = Event()
     logger = Logger(locker=Lock())
     proxy_handler = Proxy(logger=logger, protocol='socks4', timeout=1000)
 
@@ -39,7 +41,7 @@ if __name__ == "__main__":
                 getUpdateAccountInfo(login_handler, account)
 
     def rewardsClaimer(account):
-        if (time() - account['last_update_time']) // (24 * 3600) >= 4:
+        if (time() - account['last_update_time']) // (24 * 3600) >= 10:
             account_session = SessionRequests(proxy_handler=proxy_handler, logger=logger)
             login_handler = Login(account_session=account_session, proxy_handler=proxy_handler, logger=logger)
             login_info = login_handler.login(login_token=account['login_token'])
@@ -55,9 +57,11 @@ if __name__ == "__main__":
 
                 while True:
                     if rewards_handler.claimXpBoostingResponse():
+                        getUpdateAccountInfo(login_handler, account)
                         break
+            blocker.set()
 
-                getUpdateAccountInfo(login_handler, account)
+                # getUpdateAccountInfo(login_handler, account)
 
     def accountCreator():
         global fail, success
@@ -90,7 +94,7 @@ if __name__ == "__main__":
 
 
     def wrapper():
-        proxy_key = input('Proxy scrape key: ')
+        # proxy_key = input('Proxy scrape key: ')
 
         print("Welcome to TPCT AVKN life bot\n\t"
               "[+] press 1 for creating the accounts\n\t"
@@ -103,7 +107,7 @@ if __name__ == "__main__":
                 while True:
                     threads_pool = []
                     for i in range(int(threads_count)):
-                        thread = Thread(target=accountCreator)
+                        thread = Thread(target=accountCreator, daemon=True)
                         thread.start()
                         threads_pool.append(thread)
 
@@ -116,23 +120,32 @@ if __name__ == "__main__":
             threads_count = input("[+] please enter threads count to start: ")
             if threads_count.isdigit():
                 while True:
-                    start_time = time()
-                    for i in range(0, len(accounts), int(threads_count)):
-                        threads_pool = []
-                        start_time_1 = time()
-                        for account in accounts[i: i + int(threads_count)]:
-                            thread = Thread(target=rewardsClaimer, daemon=True, args=(account,),
-                                            name=account['id'])
-                            thread.start()
-                            threads_pool.append(thread)
-                        for thread in threads_pool:
-                            thread.join() if thread.is_alive() else None
-                        logger.log(
-                            f"failed: {fail}, success: {success}, time elapsed: {time() - start_time_1}")
-                    operation_time = time() - start_time
-                    sleep_time = 6*3600 - operation_time
-                    logger.log(f"time elapsed: {operation_time}")
-                    sleep(sleep_time) if sleep_time > 0 else None
+                    threads_pool = []
+                    for account in accounts:
+                        thread = Thread(target=rewardsClaimer, daemon=True, args=(account,),
+                                        name=account['id'])
+                        thread.start()
+                        threads_pool.append(thread)
+
+                        if len(threads_pool) >= int(threads_count):
+                            blocker.clear()
+                        blocker.wait()
+
+                    # threads_pool.append(thread)
+                    # start_time = time()
+                    # for i in range(0, len(accounts), int(threads_count)):
+                    #     threads_pool = []
+                    #     start_time_1 = time()
+                    #
+                    #     for thread in threads_pool:
+                    #         thread.join() if thread.is_alive() else None
+                    #     logger.log(
+                    #         f"failed: {fail}, success: {success}, time elapsed: {time() - start_time_1}")
+                    #
+                    # operation_time = time() - start_time
+                    # sleep_time = 6*3600 - operation_time
+                    # logger.log(f"time elapsed: {operation_time}")
+                    # sleep(sleep_time) if sleep_time > 0 else None
         elif choice == "3":
             accounts = account_database.selectAll()
             threads_count = input("[+] please enter threads count to start: ")

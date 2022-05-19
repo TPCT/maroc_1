@@ -31,13 +31,18 @@ class SessionRequests:
         response = None
         try:
             self._session.headers['user-agent'] = str(time())
-            response = self._session.request(*args, **kwargs, verify=False, timeout=10)
+            response = self._session.request(*args, **kwargs, verify=False)
         except Exception as e:
             self._logger.log("[-] an error occurred while trying to make request\n\t "
                              f"[-] error: {e}")
         return response
 
     def request(self, *args, **kwargs):
+        self._logger.log("[+] trying to send request.\n\t "
+                         f"[+] endpoint: {args[1]}\n\t "
+                         f"[+] payload: {kwargs.get('json', kwargs.get('data', None))}\n\t "
+                         f"[+] proxy: {self._proxy}\n\t ")
+
         response = self._request(*args, **kwargs)
         if response is None or response.status_code in (429, 419, 403):
             self._logger.log("[-] the last response has been blocked.\n\t "

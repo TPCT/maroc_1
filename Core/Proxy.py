@@ -4,6 +4,7 @@ from Core.Urls import ProxyUrls
 from random import shuffle
 from requests import get
 
+
 class Proxy:
     def __init__(self, **kwargs):
         self._logger = kwargs.get('logger', Logger())
