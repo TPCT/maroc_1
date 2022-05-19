@@ -18,3 +18,13 @@ class RewardsUrls:
     spin_1 = "https://api.avkn.co/games/1/sw/1/get"
     spin_2 = "https://api.avkn.co/games/1/sw/1/claim"
     gems = "https://api.avkn.co/rewards/1/userreward/1/award"
+
+
+class ProxyUrls:
+    get_proxy_list = "https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list?" \
+                     "auth={authentication_key:s}&" \
+                     "type=getproxies&" \
+                     "country[]=all" \
+                     "&protocol={protocol:s}&" \
+                     "format=json" \
+                     "&status=all"

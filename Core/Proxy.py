@@ -1,25 +1,21 @@
 import os.path
 from Core.Logger import Logger
+from Core.Urls import ProxyUrls
 from random import shuffle
-
+from requests import get
 
 class Proxy:
-    PROXY_URL = "https://api.proxyscrape.com/v2/?request=displayproxies&protocol={protocol}&timeout={" \
-                "timeout}&country={country}&ssl={ssl}&anonymity={anonymity} "
-
     def __init__(self, **kwargs):
         self._logger = kwargs.get('logger', Logger())
-        self._protocol = kwargs.get('protocol', 'socks4')
-        timeout = kwargs.get('timeout', 1000)
-        country = kwargs.get('country', 'all')
-        ssl = kwargs.get('ssl', 'all')
-        anonymity = kwargs.get('anonymity', 'all')
-        self._proxy_url = Proxy.PROXY_URL.format(**{'protocol': self._protocol, 'timeout': timeout,
-                                                    'country': country, 'ssl': ssl, 'anonymity': anonymity})
+        self._protocol = kwargs.get('protocol', 'socks')
+        authentication_key = kwargs.get('authentication_key', "")
         self._proxies = []
         self._current_counter = 0
         self._proxies_count = 0
         self._readProxies()
+
+    def setAuthenticationKey(self, authentication_key):
+        pass
 
     def _readProxies(self):
         self._logger.log("trying to get proxy list from proxy scrape")
@@ -62,5 +58,4 @@ class Proxy:
 
 
 if __name__ == "__main__":
-    proxy = Proxy()
-    proxy.getProxyList()
+    proxy_r

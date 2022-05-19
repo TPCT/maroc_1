@@ -90,6 +90,8 @@ if __name__ == "__main__":
 
 
     def wrapper():
+        proxy_key = input('Proxy scrape key: ')
+
         print("Welcome to TPCT AVKN life bot\n\t"
               "[+] press 1 for creating the accounts\n\t"
               "[+] press 2 for making watcher thread\n\t"
