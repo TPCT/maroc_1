@@ -5,7 +5,7 @@ from Core.SessionRequests import SessionRequests
 from Core.Logger import Logger
 from Core.Proxy import Proxy
 from time import time, sleep
-from threading import Thread, Lock, Event
+from threading import Thread, Lock, Event, current_thread
 from random import randint
 
 
@@ -13,6 +13,7 @@ if __name__ == "__main__":
     blocker = Event()
     logger = Logger(locker=Lock())
     proxy_handler = Proxy(logger=logger, protocol='socks4', timeout=1000)
+    threads_pool = []
 
     fail = 0
     success = 0
@@ -60,7 +61,7 @@ if __name__ == "__main__":
                         getUpdateAccountInfo(login_handler, account)
                         break
             blocker.set()
-
+            threads_pool.remove(current_thread)
                 # getUpdateAccountInfo(login_handler, account)
 
     def accountCreator():
@@ -92,8 +93,8 @@ if __name__ == "__main__":
 
         fail += 1
 
-
     def wrapper():
+        global threads_pool
         # proxy_key = input('Proxy scrape key: ')
 
         print("Welcome to TPCT AVKN life bot\n\t"
@@ -105,7 +106,6 @@ if __name__ == "__main__":
             threads_count = input("[+] please enter threads count to start: ")
             if threads_count.isdigit():
                 while True:
-                    threads_pool = []
                     for i in range(int(threads_count)):
                         thread = Thread(target=accountCreator, daemon=True)
                         thread.start()
@@ -116,17 +116,16 @@ if __name__ == "__main__":
             pass
         elif choice == "2":
             accounts = account_database.selectAll()
-            accounts.reverse()
             threads_count = input("[+] please enter threads count to start: ")
+            blocker.set()
             if threads_count.isdigit():
                 while True:
-                    threads_pool = []
                     for account in accounts:
                         thread = Thread(target=rewardsClaimer, daemon=True, args=(account,),
                                         name=account['id'])
                         thread.start()
                         threads_pool.append(thread)
-
+                        print(threads_count, len(threads_pool))
                         if len(threads_pool) >= int(threads_count):
                             blocker.clear()
                         blocker.wait()
